@@ -14,7 +14,7 @@ data_PM_im <- read_xlsx(paste0(path_particules,"Exposition_2018_v2019_com.xlsx")
 
 #---- DATA PREP ----
 data_prep <- function(data){
-  #enlever les colonnes et lignes ? partir de 'Grand Total' pour ne garder que les num?ros de communes et concentrations de pollution
+  #enlever les colonnes et lignes à partir de 'Grand Total' pour ne garder que les numéros de communes et concentrations de pollution
   data <- data %>% select(1:(which(colnames(data)=="Grand Total")-1)) %>%
     rename(COM = `Row Labels`) %>%
     filter(nchar(COM)==5) 
@@ -31,7 +31,7 @@ data_prep <- function(data){
 }
 
 #ajouter une colonne avec le type de polluant et
-#calculer les concentrations en PM2.5 et PM10 d'apr?s les formules propos?es par AtmoSud
+#calculer les concentrations en PM2.5 et PM10 d'après les formules proposées par AtmoSud
 data_O3 <- data_prep(data_O3_im) %>% add_column(TYPE_POLLUANT = "O3", .before=1)
 data_NO2 <- data_prep(data_NO2_im) %>% add_column(TYPE_POLLUANT = "NO2", .before=1)
 
@@ -52,7 +52,7 @@ data_noms_com_im <- read_xlsx(paste0(path_particules,"Exposition_2018_v2019_com.
 data_noms_com <- data_noms_com_im %>% select(INSEE_COM,NOM_COM)
 data_noms_com <- data_noms_com[!duplicated(data_noms_com),]
 
-#ajout du num de d?partement entre parenth?ses, notamment pour ne pas avoir de doublons dans les noms de communes (ex : "Aiglun" devient "Aiglun (04)")
+#ajout du num de département entre parenth?ses, notamment pour ne pas avoir de doublons dans les noms de communes (ex : "Aiglun" devient "Aiglun (04)")
 data_noms_com <- data_noms_com %>% mutate(NOM_COMMUNE = paste0(NOM_COM," (",substr(INSEE_COM,1,2),")")) %>%
   select(-NOM_COM)
 
@@ -63,7 +63,7 @@ df <- data_noms_com %>% right_join(data_pol,by=c("INSEE_COM" = "COM"))
 df <- df %>% arrange(NOM_COMMUNE)
 dfl <- split(df, f = df$NOM_COMMUNE)
 
-#liste par commune de liste par polluant de dataframes (voir si utile pour combiner les s?lecteurs de commune et de polluant)
+#liste par commune de liste par polluant de dataframes (voir si utile pour combiner les sélecteurs de commune et de polluant)
 dfl2 <- list()
 for(li in 1:length(dfl)){
   dfl2[[li]] <- list(dfl[[li]]$NOM_COMMUNE[1],split(dfl[[li]], f = dfl[[li]]$TYPE_POLLUANT))
@@ -85,13 +85,13 @@ max_pm10 <- df %>% filter(TYPE_POLLUANT == "PM10") %>% summarise(max_pm=max(POLL
 
 
 
-#---- V1 HISTOGRAMME : s?lecteur du polluant ----
+#---- V1 HISTOGRAMME : sélecteur du polluant ----
 
-#ajouter une barre verticale avec le seuil recommand? par l'OMS : 
-#PM2.5 : 10 ??g/m3 moyenne annuelle, 25 ??g/m3 moyenne sur 24 heures 
-#PM10 : 20 ??g/m3 moyenne annuelle, 50 ??g/m3 moyenne sur 24 heures 
-#O3 : 100 ??g/m3 moyenne sur 8 heures
-#NO2 : 40 ??g/m3 moyenne annuelle, 200 ??g/m3 moyenne sur 24 heures 
+#ajouter une barre verticale avec le seuil recommandé par l'OMS : 
+#PM2.5 : 10 µg/m3 moyenne annuelle, 25 µg/m3 moyenne sur 24 heures 
+#PM10 : 20 µg/m3 moyenne annuelle, 50 µg/m3 moyenne sur 24 heures 
+#O3 : 100 µg/m3 moyenne sur 8 heures
+#NO2 : 40 µg/m3 moyenne annuelle, 200 µg/m3 moyenne sur 24 heures 
 
 
 input_commune <- "Marseille 1er Arrondissement (13)"
@@ -113,7 +113,7 @@ fig <- fig %>%
   add_segments(x=40,xend=40, y=0,yend=1.2*(df %>% filter(NOM_COMMUNE==input_commune, TYPE_POLLUANT=="NO2") %>% summarise(max(POPULATION)))[[1]], 
                line=list(color='red'), visible = FALSE) %>%
   add_text(x=40+0.5,y=(df %>% filter(NOM_COMMUNE==input_commune, TYPE_POLLUANT=="NO2") %>% summarise(max(POPULATION)))[[1]],
-           text= 'Seuil de l\'OMS', textposition = "top right", visible = FALSE) %>%
+           text = 'Seuil de l\'OMS', textposition = "top right", visible = FALSE) %>%
   
   #O3
   add_bars(data = df %>% filter(NOM_COMMUNE==input_commune, TYPE_POLLUANT=="O3"),
@@ -122,9 +122,9 @@ fig <- fig %>%
   add_segments(x=100,xend=100, y=0,yend=1.2*(df %>% filter(NOM_COMMUNE==input_commune, TYPE_POLLUANT=="O3") %>% summarise(max(POPULATION)))[[1]], 
                line=list(color='red'), visible = FALSE) %>%
   add_text(x=100+0.5,y=(df %>% filter(NOM_COMMUNE==input_commune, TYPE_POLLUANT=="O3") %>% summarise(max(POPULATION)))[[1]],
-           text= 'Seuil de l\'OMS', textposition = "top right", visible = FALSE) %>%
+           text = 'Seuil de l\'OMS', textposition = "top right", visible = FALSE) %>%
   
-  #PM2.5 (qui s'affichent au d?marragent : on ne met pas le param?tre "visible=FALSE")
+  #PM2.5 (qui s'affichent au démarragent : on ne met pas le paramètre "visible=FALSE")
   add_bars(data = df %>% filter(NOM_COMMUNE==input_commune, TYPE_POLLUANT=="PM2.5"),
            x = ~POLLUTION,  y = ~POPULATION,
            name = "PM2.5", marker=list(color=col_pm25)) %>%
@@ -144,11 +144,11 @@ fig <- fig %>%
 
 
 
-#ajout des s?lecteurs
+#ajout des sélecteurs
 fig <- fig %>%
   layout(updatemenus = list(
     
-    #boutons pour s?lectionner le polluant
+    #boutons pour sélectionner le polluant
     list(
       active = -1,
       type= 'buttons', direction = "right",
@@ -181,11 +181,11 @@ fig <- fig %>%
 
 
 
-#ajout des ?l?ments de layout
-fig <- fig %>% layout(title = paste0("Population soumise aux diff?rents niveaux de concentration en PM ? ",input_commune),
+#ajout des éléments de layout
+fig <- fig %>% layout(title = paste0("Population soumise aux différents niveaux de concentration en PM2.5 à ",input_commune),
                       showlegend=FALSE,
-                      xaxis=list(title="Niveau de pollution (??g/m3)",range = c(0,max_pm25)),
-                      yaxis=list(title="Population concern?e"))
+                      xaxis=list(title="Niveau de pollution (µg/m3)",range = c(0,max_pm25)),
+                      yaxis=list(title="Population concernée"))
 
 
 fig
@@ -193,10 +193,10 @@ fig
 
 
 
-#---- V2 HISTOGRAMME : s?lecteur de la commune ----
+#---- V2 HISTOGRAMME : sélecteur de la commune ----
 
 
-#cr?ation de la liste de param?tres "visible" (TRUE/FALSE)
+#création de la liste de paramètres "visible" (TRUE/FALSE)
 dd <- dfl[[1]]
 recap_option_com <- list()
 list_visible <- list()
@@ -216,7 +216,7 @@ for (i in 1:length(dfl)){
 }
 
 
-#Pour les PM2.5 : pour la 1?re commune cr?ation du barplot et ajout de la ligne du seuil de l'OMS
+#Pour les PM2.5 : pour la 1ère commune création du barplot et ajout de la ligne du seuil de l'OMS
 fig2 <- plot_ly(type = "bar", name='') %>%
   
   add_bars(data = dd %>% filter(TYPE_POLLUANT=="PM2.5"),
@@ -243,17 +243,16 @@ for (i in 2:length(dfl)){
 } 
 
 
-#ajout des ?l?ments de layout : titre&co et boutons
-fig2 <- fig2 %>% layout(title = "Population soumise aux diff?rents niveaux de concentration en PM2.5",
+#ajout des éléments de layout : titre&co et boutons
+fig2 <- fig2 %>% layout(title = "Population soumise aux différents niveaux de concentration en PM2.5",
                showlegend=FALSE,
-               xaxis=list(title="Niveau de pollution (??g/m3)",range = c(0,max_pm25)),
-               yaxis=list(title="Population concern?e"),
+               xaxis=list(title="Niveau de pollution (µg/m3)",range = c(0,max_pm25)),
+               yaxis=list(title="Population concernée"),
                updatemenus=list(
                   list(
                     y = 0.85, x=0.95,
                     buttons=recap_option_com
                   )
-                  
                 ))
 
 fig2
