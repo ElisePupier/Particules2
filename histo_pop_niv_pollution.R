@@ -26,7 +26,7 @@ data_prep <- function(data){
     mutate(POLLUTION = as.numeric(POLLUTION)) %>%
     #arrondir le nombre d'habitants
     mutate(POPULATION = round(POPULATION)) %>%
-    #supprimer les NA (0 habitants concern?s par ce niveau de pollution)
+    #supprimer les NA (0 habitants concernés par ce niveau de pollution)
     filter(!is.na(POPULATION))
 }
 
@@ -52,7 +52,7 @@ data_noms_com_im <- read_xlsx(paste0(path_particules,"Exposition_2018_v2019_com.
 data_noms_com <- data_noms_com_im %>% select(INSEE_COM,NOM_COM)
 data_noms_com <- data_noms_com[!duplicated(data_noms_com),]
 
-#ajout du num de département entre parenth?ses, notamment pour ne pas avoir de doublons dans les noms de communes (ex : "Aiglun" devient "Aiglun (04)")
+#ajout du num de département entre parenthèses, notamment pour ne pas avoir de doublons dans les noms de communes (ex : "Aiglun" devient "Aiglun (04)")
 data_noms_com <- data_noms_com %>% mutate(NOM_COMMUNE = paste0(NOM_COM," (",substr(INSEE_COM,1,2),")")) %>%
   select(-NOM_COM)
 
@@ -75,7 +75,7 @@ for(li in 1:length(dfl)){
 liste_communes <- as.list(data_noms_com['NOM_COMMUNE'])$NOM_COMMUNE
 liste_arts_marseille <- liste_communes[grep("Marseille ", liste_communes)]
 
-#max observ?s de chaque polluant (pour l'?chelle des abscisses - pour les min on prendra 0 ; 80 pour l'O3 
+#max observés de chaque polluant (pour l'échelle des abscisses - pour les min on prendra 0 ; 80 pour l'O3 
 max_no2 <- df %>% filter(TYPE_POLLUANT == "NO2") %>% summarise(max_no2=max(POLLUTION))
 max_no2 <- max_no2[[1]]
 max_o3 <- df %>% filter(TYPE_POLLUANT == "O3") %>% summarise(max_o3=max(POLLUTION)) ; max_o3 <- max_o3[[1]]
@@ -156,33 +156,33 @@ fig <- fig %>%
       buttons = list(
         list(method = "update",
              args = list(list(visible = c(FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)),
-                         list(title = paste0("Population soumise aux diff?rents niveaux de concentration en NO2 ? ",input_commune),
-                         xaxis=list(title="Niveau de pollution (??g/m3)",range = c(0,max_no2)))),
+                         list(title = paste0("Population soumise aux différents niveaux de concentration en NO2 à ",input_commune),
+                         xaxis=list(title="Niveau de pollution (µg/m3)",range = c(0,max_no2)))),
              label = "NO2"),
         
         list(method = "update",
              args = list(list(visible = c(FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)),
-                         list(title = paste0("Population soumise aux diff?rents niveaux de concentration en O3 ? ",input_commune),
-                              xaxis=list(title="Niveau de pollution (??g/m3)",range = c(80,max_o3)))),
+                         list(title = paste0("Population soumise aux différents niveaux de concentration en O3 à ",input_commune),
+                              xaxis=list(title="Niveau de pollution (µg/m3)",range = c(80,max_o3)))),
               label = "O3"),
 
         list(method = "update",
              args = list(list(visible = c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE)),
-                         list(title = paste0("Population soumise aux diff?rents niveaux de concentration en PM2.5 ? ",input_commune),
-                              xaxis=list(title="Niveau de pollution (??g/m3)",range = c(0,max_pm25)))),
+                         list(title = paste0("Population soumise aux différents niveaux de concentration en PM2.5 à ",input_commune),
+                              xaxis=list(title="Niveau de pollution (µg/m3)",range = c(0,max_pm25)))),
              label = "PM2.5"),
 
         list(method = "update",
              args = list(list(visible = c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE)),
-                         list(title = paste0("Population soumise aux diff?rents niveaux de concentration en PM10 ? ",input_commune),
-                              xaxis=list(title="Niveau de pollution (??g/m3)",range = c(0,max_pm10)))),
+                         list(title = paste0("Population soumise aux différents niveaux de concentration en PM10 à ",input_commune),
+                              xaxis=list(title="Niveau de pollution (µg/m3)",range = c(0,max_pm10)))),
              label = "PM10")
       ))))
 
 
 
 #ajout des éléments de layout
-fig <- fig %>% layout(title = paste0("Population soumise aux différents niveaux de concentration en PM2.5 à ",input_commune),
+fig <- fig %>% layout(title = paste0("Population soumise aux différents niveaux de concentration en polluants à ",input_commune),
                       showlegend=FALSE,
                       xaxis=list(title="Niveau de pollution (µg/m3)",range = c(0,max_pm25)),
                       yaxis=list(title="Population concernée"))
