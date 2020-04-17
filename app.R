@@ -1,3 +1,4 @@
+rm(list=ls())
 
 library(readxl)
 library(plotly)
@@ -9,7 +10,7 @@ library(dashHtmlComponents)
 library(dashCoreComponents)
 library(dashTable)
 
-
+#options(encoding = "UTF-8")
 
 
 #---- IMPORT DATA ----
@@ -76,8 +77,25 @@ df <- df %>% mutate(INSEE_COM = substr(INSEE_COM,1,2)) %>%
     DEPT=="83" ~ "83 - Var",
     DEPT=="84" ~ "84 - Vaucluse"
   ))
-           
+  
+#ajouter des variables avec les noms de communes et de départements sans accents          
           
+#suppression des accents pour éviter les bugs d'encodage
+#ä -> \U{00E4} ; â -> \U{00E2} ; à -> \U{00E0} ; À -> \U{00C0} ; Â -> \U{00C2}
+#ç -> \U{00E7} ; Ç -> \U{00C7} ; œ -> \U{0153}
+#é -> \U{00E9} ; É -> \U{00C9} ; è -> \U{00E8} ; È -> \U{00C8}
+#ê -> \U{00EA} ; Ê -> \U{00CA} ; ë -> \U{00EB}
+#ï -> \U{00EF} ; î -> \U{00EE}
+#ô -> \U{00F4} ; ö -> \U{00F6} ;
+#ù -> \U{00F9} ; û -> \U{00FB} ; ü -> \U{00FC}
+
+#recherche d'éléments
+#grep(pattern = "è", liste_communes, value = TRUE, fixed=FALSE)
+#remplacement de caractères
+#liste_departements <- gsub(pattern = "ô" , replacement = "\U{00F4}" , liste_departements, fixed = TRUE)
+#df$DEPT <- gsub(pattern = "ô" , replacement = "\U{00F4}" , df$DEPT, fixed = TRUE)
+
+#df$DEPT <- gsub(pattern = "ô" , replacement = "o" , df$DEPT, fixed = TRUE)
 
 
 #---- VALEURS UTILES ----
@@ -110,8 +128,9 @@ if (appName != ""){
 }
 
 
-input_dept <- "05 - Hautes-Alpes"
-input_commune <- "Abriès"
+input_dept <- "13 - Bouches-du-Rhône" #\U{00F4}
+input_commune <- "Aix-en-Provence"
+input_polluant <- "PM2.5"
 
 col_no2 <- '#454545'
 col_o3 <- '#016FBF'
@@ -119,93 +138,40 @@ col_pm25 <- '#F54A4A'
 col_pm10 <- '#FFA55E'
 
 
+
 #######################################################################
 
 app <- Dash$new(name = "Population soumise à la pollution")
 
 
+#éléments spécifiques à chaque polluant : nom, couleur col_pol, seuil OMS seuil_pol, range (min-80 O3 sinon 0- &max)
 
 # Create histogram
-createHistogram <- function(input_dept,input_commune){
+createHistogram <- function(input_dept, input_commune, input_polluant){
+  
+  #paramètres par polluant
+  if(input_polluant == "NO2"){col_pol <- col_no2 ; seuil_pol <- 40 ; min_pol <- 0 ; max_pol <- max_no2
+  }else if(input_polluant == "O3"){col_pol <- col_o3 ; seuil_pol <- 100 ; min_pol <- 80 ; max_pol <- max_o3
+  }else if(input_polluant == "PM2.5"){col_pol <- col_pm25 ; seuil_pol <- 10 ; min_pol <- 0 ; max_pol <- max_pm25
+  }else if(input_polluant == "PM10"){col_pol <- col_pm10 ; seuil_pol <- 20 ; min_pol <- 0 ; max_pol <- max_pm10}
+  
   #graph de base
   fig <- plot_ly(type = "bar", name='') 
   
   #pour chaque polluant : ajout de l'histogramme, de la ligne rouge de seuil OMS, et du texte "Seuil de l'OMS"
   fig <- fig %>% 
-    #NO2
-    add_bars(data = df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT=="NO2"),
+
+    add_bars(data = df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT==input_polluant),
              x = ~POLLUTION,  y = ~POPULATION,
-             name = "NO2", marker=list(color=col_no2), visible = FALSE) %>% 
-    add_segments(x=40,xend=40, y=0,yend=1.2*(df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT=="NO2") %>% summarise(max(POPULATION)))[[1]], 
-                 line=list(color='red'), visible = FALSE) %>%
-    add_text(x=40+0.5,y=(df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT=="NO2") %>% summarise(max(POPULATION)))[[1]],
-             text = 'Seuil de l\'OMS', textposition = "top right", visible = FALSE) %>%
-    
-    #O3
-    add_bars(data = df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT=="O3"),
-             x = ~POLLUTION,  y = ~POPULATION,
-             name = "O3", marker=list(color=col_o3), visible = FALSE) %>% 
-    add_segments(x=100,xend=100, y=0,yend=1.2*(df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT=="O3") %>% summarise(max(POPULATION)))[[1]], 
-                 line=list(color='red'), visible = FALSE) %>%
-    add_text(x=100+0.5,y=(df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT=="O3") %>% summarise(max(POPULATION)))[[1]],
-             text = 'Seuil de l\'OMS', textposition = "top right", visible = FALSE) %>%
-    
-    #PM2.5 (qui s'affichent au démarragent : on ne met pas le paramètre "visible=FALSE")
-    add_bars(data = df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT=="PM2.5"),
-             x = ~POLLUTION,  y = ~POPULATION,
-             name = "PM2.5", marker=list(color=col_pm25)) %>%
-    add_segments(x=10,xend=10, y=0,yend=1.2*(df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT=="PM2.5") %>% summarise(max(POPULATION)))[[1]], 
+             name = input_polluant, marker=list(color=col_pol)) %>% 
+    add_segments(x=seuil_pol,xend=seuil_pol, y=0,yend=1.2*(df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT==input_polluant) %>% summarise(max(POPULATION)))[[1]], 
                  line=list(color='red')) %>%
-    add_text(x=10+0.2,y=(df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT=="PM2.5") %>% summarise(max(POPULATION)))[[1]],
-             text= 'Seuil de l\'OMS', textposition = "top right") %>%
+    add_text(x=seuil_pol*1.002,y=(df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT==input_polluant) %>% summarise(max(POPULATION)))[[1]],
+             text = 'Seuil de l\'OMS', textposition = "top right") 
     
-    #PM10
-    add_bars(data = df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT=="PM10"),
-             x = ~POLLUTION,  y = ~POPULATION,
-             name = "PM10", marker=list(color=col_pm10), visible = FALSE) %>%
-    add_segments(x=20,xend=20, y=0,yend=1.2*(df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT=="PM10") %>% summarise(max(POPULATION)))[[1]], 
-                 line=list(color='red'), visible = FALSE) %>%
-    add_text(x=20+0.5,y=(df %>% filter(DEPT==input_dept, NOM_COM==input_commune, TYPE_POLLUANT=="PM10") %>% summarise(max(POPULATION)))[[1]],
-             text= 'Seuil de l\'OMS', textposition = "top right", visible = FALSE)
-  
-  
-  
-  #ajout des sélecteurs
-  fig <- fig %>%
-    layout(updatemenus = list(
-      
-      #boutons pour sélectionner le polluant
-      list(
-        active = -1,
-        type= 'buttons', direction = "right",
-        y = 0.92, x=0.95,
-        buttons = list(
-          list(method = "update",
-               args = list(list(visible = c(FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)),
-                           list(xaxis=list(title="Niveau de pollution (µg/m3)",range = c(0,max_no2)))),
-               label = "NO2"),
-          
-          list(method = "update",
-               args = list(list(visible = c(FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)),
-                           list(xaxis=list(title="Niveau de pollution (µg/m3)",range = c(80,max_o3)))),
-               label = "O3"),
-          
-          list(method = "update",
-               args = list(list(visible = c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE)),
-                           list(xaxis=list(title="Niveau de pollution (µg/m3)",range = c(0,max_pm25)))),
-               label = "PM2.5"),
-          
-          list(method = "update",
-               args = list(list(visible = c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE)),
-                           list(xaxis=list(title="Niveau de pollution (µg/m3)",range = c(0,max_pm10)))),
-               label = "PM10")
-        ))))
-  
-  
-  
   #ajout des éléments de layout
   fig <- fig %>% layout(showlegend=FALSE,
-                        xaxis=list(title="Niveau de pollution (µg/m3)",range = c(0,max_pm25)),
+                        xaxis=list(title="Niveau de pollution (µg/m3)",range = c(min_pol,max_pol)),
                         yaxis=list(title="Population concernée"))
   
   
@@ -259,31 +225,47 @@ app$layout(
                 value = input_dept,
                 clearable = FALSE,
                 style=list("font-family"= "calibri")
+              ),
+              htmlDiv(
+                id = "commune-select-outer",
+                children = list(
+                  htmlLabel("Sélectionnez une commune",style=list("font-family"= "calibri")),
+                  htmlDiv(
+                    id = "commune-select-dropdown-outer",
+                    children = list(
+                      dccDropdown(
+                        id = "commune-select",
+                        # options = lapply(
+                        #   as.list((df_dept_com %>% filter(DEPT==input_dept) %>% select(NOM_COM))$NOM_COM),
+                        #   function(x){
+                        #     list(label = x, value = x)
+                        #   }
+                        # ),
+                        # value=input_commune,
+                        # style=list("font-family"= "calibri"),
+                        # searchable = TRUE #permet l'autocomplétion
+                      )
+                    )
+                  )
+                  
+                )
               )
             )
           ),
+          
           htmlDiv(
-            id = "commune-select-outer",
+            id = "polluant-select-outer",
             children = list(
-              htmlLabel("Sélectionnez une commune",style=list("font-family"= "calibri")),
-              htmlDiv(
-                id = "commune-select-dropdown-outer",
-                children = list(
-                  dccDropdown(
-                    id = "commune-select",
-                    # options = lapply(
-                    #   as.list((df_dept_com %>% filter(DEPT==input_dept) %>% select(NOM_COM))$NOM_COM),
-                    #   function(x){
-                    #     list(label = x, value = x)
-                    #   }
-                    # ),
-                    # value=input_commune,
-                    # style=list("font-family"= "calibri"),
-                    # searchable = TRUE #permet l'autocomplétion
-                  )
-                )
+              htmlLabel("Sélectionnez un polluant",style=list("font-family"= "calibri")),
+              dccDropdown(
+                id = "polluant-select",
+                options = list(list(label = 'NO2', value = 'NO2'),
+                               list(label = 'O3', value = 'O3'),
+                               list(label = 'PM2.5', value = 'PM2.5'),
+                               list(label = 'PM10', value = 'PM10')),
+                value="PM2.5",
+                style=list("font-family"= "calibri")
               )
-              
             )
           )
         )
@@ -307,7 +289,8 @@ app$layout(
                     id = "id-histo",
                     figure = createHistogram(
                       input_dept,
-                      input_commune
+                      input_commune,
+                      input_polluant
                     )
                   )
                 ),
@@ -375,20 +358,16 @@ app$callback(
 )
 
 
-# app$callback(
-#   output=list(id='commune-select-dropdown-outer', property='value'),
-#   params=list(input(id='commune-select-dropdown-outer', property='options')),
-#   function(option) NULL
-# )
 
 
 app$callback(
   output("id-histo", "figure"),
   list(input("departement-select", "value"),
-       input("commune-select", "value")),
+       input("commune-select", "value"),
+       input("polluant-select", "value")),
 
-  function(input_dept,input_commune){
-    createHistogram(input_dept,input_commune)
+  function(input_dept,input_commune,input_polluant){
+    createHistogram(input_dept,input_commune,input_polluant)
   }
 )
 
