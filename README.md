@@ -11,10 +11,11 @@ install.packages(c("here","jsonlite","plotly","tidyverse","data.table","dash","d
 
 4/ Ouvrir le script "app.R" (File/Open File...)
 (avoir le fichier data_histo_noms_com_polluants.json dans le même dossier)
-L'exécuter en sélectionnant tout le script + CTRL + Enter
 
-5/ Copier le chemin "127.0.0.1:8050" dans un navigateur
+5/ L'exécuter en sélectionnant tout le script + CTRL + Enter
 
-6/ Changement possible des paramètres, notamment la font l.18 : type_font
+6/ Copier le chemin obtenu "127.0.0.1:8050" dans un navigateur
+
+7/ Changement possible des paramètres, notamment la font l.18 : type_font
 
 (pour ré-exécuter après un changement de code : bouton STOP en haut à droite de la console, puis ré-exécuter avec sélection du script + CTRL + Enter)
