@@ -1,5 +1,6 @@
 rm(list=ls()) #instruction permettant d'effacer la mémoire R
 
+library(here)
 library(jsonlite)
 library(plotly)
 library(tidyverse)
@@ -29,11 +30,10 @@ col_gris_leger <- "#F4F4F4"
 
 #---- IMPORT DATA ----
 
-path_particules <- "C:/Users/elise/Documents/Data for good/Particules/DataViz/Particules2/"
-
 #fichier des données mises sous forme de liste (.json) : 
 #population concernée par niveau de pollution, pour chaque polluant et chaque commune
-df_list <- read_json(paste0(path_particules,"data_histo_noms_com_polluants.json"))
+
+df_list <- read_json(here("data_histo_noms_com_polluants.json"))
 
 
 
