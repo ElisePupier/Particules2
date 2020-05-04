@@ -19,3 +19,13 @@ install.packages(c("here","jsonlite","plotly","tidyverse","data.table","dash","d
 7/ Changement possible des paramètres, notamment la font l.18 : type_font
 
 (pour ré-exécuter après un changement de code : bouton STOP en haut à droite de la console, puis ré-exécuter avec sélection du script + CTRL + Enter)
+
+----
+
+Liens utiles pour l'utilisation de Dash (https://dashr.plotly.com/) : 
+
+Déploiement : https://dashr.plotly.com/deployment
+
+Tuto layout : https://dashr.plotly.com/layout
+Tuto callbacks : https://dashr.plotly.com/basic-callbacks 
+
