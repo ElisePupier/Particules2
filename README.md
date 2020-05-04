@@ -10,6 +10,7 @@ Pour exécuter l'application en local :
 install.packages(c("here","jsonlite","plotly","tidyverse","data.table","dash","dashHtmlComponents","dashCoreComponents","dashTable")
 
 4/ Ouvrir le script "app.R" (File/Open File...)
+(avoir le fichier data_histo_noms_com_polluants.json dans le même dossier)
 L'exécuter en sélectionnant tout le script + CTRL + Enter
 
 5/ Copier le chemin "127.0.0.1:8050" dans un navigateur
