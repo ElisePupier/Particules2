@@ -5,6 +5,7 @@ library(tidyverse)
 library(data.table)
 
 
+
 #---- IMPORT DATA ----
 path_particules <- "C:/Users/elise/Documents/Data for good/Particules/DataViz/Particules2/"
 data_O3_im <- read_xlsx(paste0(path_particules,"Exposition_2018_v2019_com.xlsx"),sheet="O3t",skip=3)
@@ -190,14 +191,26 @@ fig <- fig %>% layout(title = paste0("Population soumise aux différents niveaux
 
 fig
 
+app <- Dash$new()
+app$layout(
+  htmlDiv(
+    list(
+      
+      dccGraph(
+        #input_commune <- "Aix-en-Provence (13)",
+        figure=fig
+        ) 
+    )
+  )
+)
 
+app$run_server(debug=TRUE, dev_tools_hot_reload=FALSE)
 
 
 #---- V2 HISTOGRAMME : sélecteur de la commune ----
 
 
 #création de la liste de paramètres "visible" (TRUE/FALSE)
-dd <- dfl[[1]]
 recap_option_com <- list()
 list_visible <- list()
 
@@ -217,29 +230,30 @@ for (i in 1:length(dfl)){
 
 
 #Pour les PM2.5 : pour la 1ère commune création du barplot et ajout de la ligne du seuil de l'OMS
+dd <- dfl[[1]]
+max_commune <- (dd %>% filter(TYPE_POLLUANT=="PM2.5") %>% summarise(max(POPULATION)))[[1]]
+
 fig2 <- plot_ly(type = "bar", name='') %>%
   
   add_bars(data = dd %>% filter(TYPE_POLLUANT=="PM2.5"),
            x = ~POLLUTION,  y = ~POPULATION,
            name = "PM2.5", marker=list(color=col_pm25)) %>%
-  add_segments(x=10,xend=10, y=0,yend=1.1*(dd %>% filter(TYPE_POLLUANT=="PM2.5") %>% summarise(max(POPULATION)))[[1]], 
-               line=list(color='red')) %>%
-  add_text(x=10+0.2,y=(dd %>% filter(TYPE_POLLUANT=="PM2.5") %>% summarise(max(POPULATION)))[[1]],
-           text= 'Seuil de l\'OMS', textposition = "top right") 
+  add_segments(x=10,xend=10, y=0,yend=1.1*max_commune, line=list(color='red')) %>%
+  add_text(x=10+0.2,y=max_commune, text= 'Seuil de l\'OMS', textposition = "top right") 
 
 
 #idem pour les autres communes
 for (i in 2:length(dfl)){ 
   dd <- dfl[[i]]
+  max_commune <- (dd %>% filter(TYPE_POLLUANT=="PM2.5") %>% summarise(max(POPULATION)))[[1]]
+  
   fig2 <- fig2 %>%
     
     add_bars(data = dd %>% filter(TYPE_POLLUANT=="PM2.5"),
              x = ~POLLUTION,  y = ~POPULATION,
              name = "PM2.5", marker=list(color=col_pm25), visible = FALSE) %>% 
-    add_segments(x=10,xend=10, y=0,yend=1.1*(dd %>% filter(TYPE_POLLUANT=="PM2.5") %>% summarise(max(POPULATION)))[[1]], 
-                 line=list(color='red'), visible = FALSE) %>%
-    add_text(x=10+0.2,y=(dd %>% filter(TYPE_POLLUANT=="PM2.5") %>% summarise(max(POPULATION)))[[1]],
-             text= 'Seuil de l\'OMS', textposition = "top right", visible = FALSE) 
+    add_segments(x=10,xend=10, y=0,yend=1.1*max_commune, line=list(color='red'), visible = FALSE) %>%
+    add_text(x=10+0.2,y=max_commune, text= 'Seuil de l\'OMS', textposition = "top right", visible = FALSE) 
 } 
 
 
