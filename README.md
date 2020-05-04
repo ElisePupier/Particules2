@@ -1,6 +1,6 @@
 # Histogramme du nombre d'habitants exposés à différents niveaux de pollution par commune
 
-Pour exécuter l'application en local :
+Pour exécuter l'application en local (besoin uniquement des fichiers "app.R" et "data_histo_noms_com_polluants.json") :
 
 1/ Installer R : https://cran.r-project.org/
 
