@@ -31,7 +31,9 @@ col_gris_leger <- "#F4F4F4"
 
 path_particules <- "C:/Users/elise/Documents/Data for good/Particules/DataViz/Particules2/"
 
-df_list <- read_json(paste0(path_particules,"data_histo_noms_com_polluants2.json"))
+#fichier des données mises sous forme de liste (.json) : 
+#population concernée par niveau de pollution, pour chaque polluant et chaque commune
+df_list <- read_json(paste0(path_particules,"data_histo_noms_com_polluants.json"))
 
 
 
@@ -66,10 +68,10 @@ createHistogram <- function(input_commune, input_polluant){
   #les max et min serviront comme paramètres pour l'échelle des axes des absisses. Les valeurs à utiliser ont été déterminées à partir des données brutes
   #les seuils sont les valeurs recommandées par l'OMS
   input_polluant_list <- input_polluant #variable utilisée pour le calcul des PM2.5 et PM10 selon PM
-  if(input_polluant == "NO2"){seuil_pol <- 40 ; min_pol <- 0 ; max_pol <- 80 
-  }else if(input_polluant == "O3"){seuil_pol <- 100 ; min_pol <- 80 ; max_pol <- 160
-  }else if(input_polluant == "PM2.5"){seuil_pol <- 10 ; min_pol <- 0 ; max_pol <- 30 ; input_polluant_list <- "PM"
-  }else if(input_polluant == "PM10"){seuil_pol <- 20 ; min_pol <- 0 ; max_pol <- 70 ; input_polluant_list <- "PM"}
+  if(input_polluant == "NO2"){seuil_pol <- 40 ; min_pol <- 0 ; max_pol <- 80 ; titre_graph <- "Dioxyde d'azote - NO2"
+  }else if(input_polluant == "O3"){seuil_pol <- 100 ; min_pol <- 80 ; max_pol <- 160 ; titre_graph <- "Ozone - O3"
+  }else if(input_polluant == "PM2.5"){seuil_pol <- 10 ; min_pol <- 0 ; max_pol <- 30 ; input_polluant_list <- "PM" ; titre_graph <- "Particules fines (< 2.5 micromètres) - PM2.5"
+  }else if(input_polluant == "PM10"){seuil_pol <- 20 ; min_pol <- 0 ; max_pol <- 70 ; input_polluant_list <- "PM" ; titre_graph <- "Particules fines (< 10 micromètres) - PM10"}
   
   
   #--Dataframe à utiliser (variables : POPULATION et POLLUTION) pour cette commune et ce polluant
@@ -88,7 +90,7 @@ createHistogram <- function(input_commune, input_polluant){
   
   
   #--Graph 
-  fig <- plot_ly(type = "bar", name = '', height = 200, width = 600) 
+  fig <- plot_ly(type = "bar", name = '', height = 200, width = 630) 
   
   #pour chaque polluant : ajout de l'histogramme, de la ligne rouge de seuil OMS, et du texte "Seuil de l'OMS"
   fig <- fig %>% 
@@ -103,10 +105,10 @@ createHistogram <- function(input_commune, input_polluant){
   
   #ajout des éléments de layout
   fig <- fig %>% layout(showlegend=FALSE,
-                        title=input_polluant,
+                        title=titre_graph,
                         font = list(family = type_font, size = size_text_axis, color = col_text),
                         xaxis=list(title = "Niveau de pollution (µg/m3)", range = c(min_pol,max_pol)),
-                        yaxis=list(title = "Nombre d'habitants"), 
+                        yaxis=list(title = "Nombre d'habitants", tickformat="d"), 
                         plot_bgcolor = col_gris_leger)
   
   fig
@@ -136,7 +138,7 @@ app$layout(
         htmlH2(
           "Habitants exposés à différents niveaux de pollution par commune",
           id = "title",
-          style=list(marginTop = "40px", marginBottom = "30px", marginLeft = "160px", 
+          style=list(marginTop = "40px", marginBottom = "20px", marginLeft = "160px", 
                      fontFamily = type_font, fontSize = size_title, color = col_title)),
         className = "banner"
       ),
@@ -146,7 +148,7 @@ app$layout(
         className = "container",
         style = list(fontFamily = type_font, fontSize = size_text, color = col_text,
                      height = "10%", justifyContent = "right", display = "flex", 
-                     marginBottom = "40px", marginRight = "160px"),
+                     marginBottom = "45px", marginRight = "160px"),
         children = list(
           htmlDiv(
             id = "commune-select-outer",
@@ -162,7 +164,7 @@ app$layout(
                     function(x){list(label = x, value = Unaccent(x))}
                   ),
                   value=Unaccent(input_commune),
-                  style=list(backgroundColor = col_gris_leger),
+                  style=list(backgroundColor = col_gris_leger, marginTop = "10px"),
                   searchable = TRUE #permet l'autocomplétion
                 )
               )
@@ -179,7 +181,7 @@ app$layout(
           htmlDiv( # Graphs du haut
             id = "top-graphs",
             style = list(display = "flex", justifyContent = "space-between", 
-                         width = "80%", height = "40vh", margin = "0 auto"),
+                         width = "85%", height = "38vh", margin = "0 auto"),
             children = list(
               htmlDiv(
                 id = "left-top-graphs",
@@ -206,7 +208,7 @@ app$layout(
           htmlDiv( # Graphs du bas
             id = "bottom-graphs",
             style = list(display = "flex", justifyContent = "space-between", 
-                         width = "80%", height = "30vh", margin = "0 auto"),
+                         width = "85%", height = "30vh", margin = "0 auto"),
             children = list(
               htmlDiv(
                 id = "left-bottom-graphs",

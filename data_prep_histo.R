@@ -86,6 +86,6 @@ for(com in 1:length(liste_communes)){ #pour chaque nom de commune
   names(df_list)[com] <- liste_communes[com] 
 }
 
-write_json(df_list,paste0(path_particules,"data_histo_noms_com_polluants2.json"))
+write_json(df_list,paste0(path_particules,"data_histo_noms_com_polluants.json"))
 
 
