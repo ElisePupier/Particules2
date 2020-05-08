@@ -37,22 +37,23 @@ df_list <- read_json(here("data_histo_noms_com_polluants.json"))
 
 
 
-#---- DATA PREP ----
+#---- DATA PREP & VALEURS UTILES ----
 
-#fonction pour enlever les accents sur value pour éviter les problèmes d'encodage
+#liste des communes 
+liste_communes <- names(df_list)
+
+
+#fonction pour enlever les accents pour éviter les problèmes d'encodage sur input_commune
 Unaccent <- function(text) {
   text <- gsub("['`^~\"]", " ", text)
-  text <- iconv(text, to="ASCII//TRANSLIT//IGNORE")
+  text <- iconv(text, from="UTF-8", to="ASCII//TRANSLIT//IGNORE")
   text <- gsub("['`^~\"]", "", text)
   return(text)
 }
 
+#enlever les accents des noms de communes dans df_list
+names(df_list) <- unlist(lapply(names(df_list),Unaccent))
 
-
-#---- VALEURS UTILES ----
-
-#liste des communes 
-liste_communes <- names(df_list)
 
 #paramètres par défaut dans les menus déroulants
 input_commune <- "Marseille 1er Arrondissement (13)"
@@ -147,8 +148,8 @@ app$layout(
         id = "controls-card",
         className = "container",
         style = list(fontFamily = type_font, fontSize = size_text, color = col_text,
-                     height = "10%", justifyContent = "right", display = "flex", 
-                     marginBottom = "45px", marginRight = "160px"),
+                     height = "10%", justifyContent = "left", display = "flex", 
+                     marginBottom = "45px", marginLeft = "160px"),
         children = list(
           htmlDiv(
             id = "commune-select-outer",
