@@ -101,7 +101,7 @@ createHistogram <- function(input_commune, input_polluant){
              name = input_polluant, marker=list(color=col_graph)) %>% 
     add_segments(x=seuil_pol,xend=seuil_pol, y=0,yend=1.2*(data_com_pol %>% summarise(max(POPULATION)))[[1]], 
                  line=list(color='red')) %>%
-    add_text(x=seuil_pol*1.002,y=(data_com_pol %>% summarise(max(POPULATION)))[[1]],
+    add_text(x=seuil_pol+(max_pol-min_pol)/150, y=(data_com_pol %>% summarise(max(POPULATION)))[[1]],
              text = 'Seuil de l\'OMS', textposition = "top right") 
   
   #ajout des éléments de layout
@@ -279,8 +279,4 @@ app$callback(
 )
 
 
-if (appName != "") {
-  app$run_server(host = "0.0.0.0", port = Sys.getenv('PORT', 8050)) 
-} else {
-  app$run_server(debug = TRUE)
-}
+app$run_server()
